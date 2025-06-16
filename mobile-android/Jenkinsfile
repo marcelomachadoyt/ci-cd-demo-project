@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+
+    environment {
+        GRADLE_OPTS = "-Dorg.gradle.jvmargs=-Xmx2048m"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/marcelomachadoyt/ci-cd-demo-project.git'
+            }
+        }
+
+        stage('Build APK') {
+            steps {
+                dir('mobile-android') {
+                    sh './gradlew assembleDebug'
+                }
+            }
+        }
+
+        stage('Run Unit Tests') {
+            steps {
+                dir('mobile-android') {
+                    sh './gradlew testDebugUnitTest'
+                }
+            }
+        }
+
+        stage('Archive APK') {
+            steps {
+                archiveArtifacts artifacts: 'mobile-android/app/build/outputs/apk/debug/app-debug.apk', fingerprint: true
+            }
+        }
+    }
+}
